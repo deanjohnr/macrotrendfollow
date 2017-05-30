@@ -1,0 +1,51 @@
+{
+    "data":{
+        "cftc":{
+            "ticker":"Market_and_Exchange_Names",
+            "date":"Report_Date_as_YYYY-MM-DD",
+            "ignore":["CFTC_Contract_Market_Code","CFTC_Market_Code","CFTC_Region_Code","CFTC_Commodity_Code",
+                 "Contract_Units","CFTC_Contract_Market_Code_Quotes","CFTC_Market_Code_Quotes",
+                 "CFTC_Commodity_Code_Quotes","CFTC_SubGroup_Code","FutOnly_or_Combined","As_of_Date_In_Form_YYMMDD"]
+        },
+        "google":{
+            "columns":["Close","Open","High","Low","Volume"],
+            "target":"Close"
+        },
+        "tickers":{
+            "INDEXCBOE:SPX":"S&P 500 Consolidated - CHICAGO MERCANTILE EXCHANGE",
+            "INDEXNYSEGIS:MID":"E-MINI S&P 400 STOCK INDEX - CHICAGO MERCANTILE EXCHANGE",
+            "INDEXNASDAQ:NDX":"NASDAQ-100 Consolidated - CHICAGO MERCANTILE EXCHANGE",
+            "INDEXNIKKEI:NI225":"NIKKEI STOCK AVERAGE - CHICAGO MERCANTILE EXCHANGE",
+            "NYSEARCA:EFA":"MSCI EAFE MINI INDEX - ICE FUTURES U.S.",
+            "INDEXDJX:USDOLLAR":"U.S. DOLLAR INDEX - ICE FUTURES U.S.",
+            "NYSEARCA:VXX":"VIX FUTURES - CBOE FUTURES EXCHANGE",
+            "NYSEARCA:DJP":"BLOOMBERG COMMODITY INDEX - CHICAGO BOARD OF TRADE"
+        }
+    },
+    "features":{
+        "momentum":{
+            "period":20,
+            "columns":null
+        },
+        "moving_average":{
+            "periods":[100,20],
+            "columns":null
+        }
+    },
+    "measurement":{
+        "start_date":"Dec 1 2005",
+        "end_date":"Jan 1 2017",
+        "train_end":"01/01/2016",
+        "forward_periods":[5,10,20],
+        "quantiles":5
+    },
+    "backtest":{
+        "factor":{
+            "factor_types":["mean","zscore"],
+            "factor_top_counts":[5,10],
+            "factor_thresholds":[0.01,0.03,0.8,1.0,1.2],
+            "minimum_sample_sizes":[10,30,100,200],
+            "minimum_asset_pct":0.5
+        }
+    }
+}
