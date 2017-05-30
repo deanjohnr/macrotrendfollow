@@ -1,5 +1,4 @@
 # macrotrendfollow
-Momentum and position based trading strategy analysis
 
 ### Summary
 This project uses Google Finance and CFTC position data to measure and backtest various momentum and position based predictive factors. The system was designed to be a brute force method, letting the data determine the important factors. Predictive power of factors is measured by comparing forward asset returns of the top and bottom quantiles of each factor. Additionally, there is a parameter optimization process that gridsearches feature selection parameters such as factor counts, factor performance metrics, and factor performance thresholds.
