@@ -12,15 +12,17 @@ The actual trading strategy rebalances a portfolio every Tuesday at market close
 ### Default Results
 Cloning and running should give a strategy that produces the following 2016 backtest results:
 
+| Metric | 2016 Return |
+|---|:---:|
 | Portfolio Return | 10.7% |
 | Index Return | -4.6% |
 | Excess Return | 15.3% |
 
-#### Strategy
-The strategy trades X assets, 
-|        asset     | feature |
--------------------------------
-|    INDEXCBOE:SPX |              Change_in_Lev_Money_Spread_All |  
+#### Winning Feature Selection
+
+| Asset | Feature |
+|---|:---:|
+| INDEXCBOE:SPX | Change_in_Lev_Money_Spread_All |
 |    INDEXCBOE:SPX |          ma_Traders_Other_Rept_Long_All_100 |  
 |    INDEXCBOE:SPX |      momo_Pct_of_OI_Asset_Mgr_Spread_All_20 |  
 |    INDEXCBOE:SPX |         ma_Change_in_Asset_Mgr_Short_All_20 |  
@@ -44,25 +46,34 @@ The strategy trades X assets,
 |     NYSEARCA:EFA |      ma_Lev_Money_Positions_Long_All_20/100 |  
 |     NYSEARCA:VXX |                Traders_Other_Rept_Short_All |
 
-### How To Execute
+Feature Key
 
-```python build_factors.py```
+| Suffix/Prefix | Meaning |
+|---|:---:|
+| ma | Moving Average |
+| mo | Trailing Period Change |
+| momo | Trailing Period Change in Change |
+| 20 | 20 Trading Day Period |
+| 20/100 | 20 Trading Day over 100 Trading Day |
+| Long_Short_Diff | Long - Short |
+| Short_Ratio | Short / Gross Total |
+| Net | Net Position |
 
-```python test_factors.py```
-Outputs ```results/parameter_returns.csv```, which can be analyzed to find best factor selection parameters. These parameters can then be used to analyze the resulting strategy.
-
-### Code Breakdown
-#### Section 1
+### Execution
+This takes over an hour:
+```
+python build_factors.py
+```
 * Scrapes data from Google Finance
 * Loads CFTC data
-* Cleans date
-* Defines feature set
-
-#### Section 2
+* Cleans data
 * Builds features
 * Calculates rolling bin and zscore factors for each feature
-* Records quantile returns for each bin factor
+* Records quantile returns and test date for backtesting
 * Records test data for backtesting
 
-#### Section 3
-* Performs factor selection parameter gridsearch to optimize backtest returns
+```
+python backtest_factors.py
+```
+* Performs factor selection parameter gridsearch and outputs backtest returns
+Results in `results/parameter_returns.csv`.
