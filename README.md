@@ -50,7 +50,7 @@ Cloning and running should give a strategy that produces the following 2016 back
 
 #### Feature Key
 
-| Suffix/Prefix | Meaning |
+| Code | Meaning |
 |---|:---:|
 | ma | Moving Average |
 | mo | Trailing Period Change |
