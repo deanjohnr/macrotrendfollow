@@ -1,15 +1,18 @@
 # macrotrendfollow
 
 ### Summary
-This project uses Google Finance and CFTC position data to measure and backtest various momentum and position based predictive factors. The system was designed to be a brute force method, letting the data determine the important factors. Predictive power of factors is measured by comparing forward asset returns of the top and bottom quantiles of each factor. Additionally, there is a parameter optimization process that gridsearches feature selection parameters such as factor counts, factor performance metrics, and factor performance thresholds.
+This project aims to measure and backtest various momentum and position based predictive factors from Google Finance and CFTC position data for 8 tickers. The system was designed to be a brute force method, letting the data determine the important factors. Predictive power of factors is measured by comparing forward asset returns of the top and bottom quantiles of each factor. Additionally, there is a parameter optimization process that gridsearches feature selection parameters such as factor counts, factor performance metrics, and factor performance thresholds.
 
 ### Trading Strategy
 The actual trading strategy rebalances a portfolio every Tuesday at market close according to mean factor zscores for each asset. Portfolio returns are benchmarked against an even allocation of contributing assets that also rebalances every Tuesday at market close.
 
-![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
+### Discussion
+Although the process is fairly robust in building and examining a large number of features, the method for measuring feature significance seems weak. There doesn't seem to be a strong correlation between top and bottom quantile zscores and backtested returns. One problem with the current method is that a feature can only have one quantile during the entire training period. For example if a feature's value is always rising, the current value may always be in the top quantile of the trailing period. Because the current method compares top and bottom quantiles, many features are eliminated from analysis in the final step.
 
 ### Default Results
 Cloning and running should give a strategy that produces the following 2016 backtest results:
+
+![alt text](https://github.com/deanjohnr/macrotrendfollow/blob/master/results/returns.png?raw=true "Returns plot")
 
 | Metric | 2016 Return |
 |---|:---:|
@@ -45,7 +48,7 @@ Cloning and running should give a strategy that produces the following 2016 back
 |     NYSEARCA:EFA |      ma_Lev_Money_Positions_Long_All_20/100 |  
 |     NYSEARCA:VXX |                Traders_Other_Rept_Short_All |
 
-Feature Key
+#### Feature Key
 
 | Suffix/Prefix | Meaning |
 |---|:---:|
@@ -76,3 +79,4 @@ python backtest_factors.py
 ```
 * Performs factor selection parameter gridsearch and outputs backtest returns
 Results in `results/parameter_returns.csv`.
+
