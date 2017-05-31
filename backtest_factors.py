@@ -19,7 +19,7 @@ def get_returns(df_result,
     max_quantile = df_result['factor_bucket'].max()
 
     # Filter to minimum sample count
-    df_result = df_result[df_result[str(forward_period)+'_count'] >= 30]
+    df_result = df_result[df_result[str(forward_period)+'_count'] >= minimum_sample_size]
     
     # Set Factor Measure
     factor_measure = str(forward_period)+'_'+factor_type
@@ -29,9 +29,9 @@ def get_returns(df_result,
                     - df_result[df_result['factor_bucket'] == min_quantile][[factor_measure]])
 
     # Filter to top factors with minimum score
-    df_top = df_meandiff.sort_values(factor_measure, ascending=False).reset_index().groupby('asset').head(factor_top_count).sort_values(['asset',factor_measure])
+    df_top = df_meandiff.drop_duplicates().sort_values(factor_measure, ascending=False).reset_index().groupby('asset').head(factor_top_count).sort_values(['asset',factor_measure])
     df_top = df_top[df_top[factor_measure] >= factor_threshold]
-    df_bot = df_meandiff.sort_values(factor_measure, ascending=False).reset_index().groupby('asset').tail(factor_top_count).sort_values(['asset',factor_measure])
+    df_bot = df_meandiff.drop_duplicates().sort_values(factor_measure, ascending=False).reset_index().groupby('asset').tail(factor_top_count).sort_values(['asset',factor_measure])
     df_bot = df_bot[df_bot[factor_measure] <= -factor_threshold]
 
     # Output final set of features
@@ -169,6 +169,7 @@ tickers = df_test['asset'].drop_duplicates().values
 for ticker in tickers:
     df_result = df_result.append(pd.read_csv('results/factors/'+ticker+'_factors.csv'))
 df_result = df_result.set_index(keys=['asset','feature'], drop=False)
+df_result = df_result.drop_duplicates()
 
 denom = float(len(forward_periods)*len(factor_types)*len(factor_top_counts)*len(minimum_sample_sizes)*len(factor_thresholds))
 print('Permutations: '+str(denom))
