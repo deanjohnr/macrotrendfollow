@@ -4,13 +4,12 @@
 This project aims to measure and backtest various momentum and position based predictive factors from Google Finance and CFTC position data for 8 tickers. The system was designed to be a brute force method, letting the data determine the important factors. Predictive power of factors is measured by comparing forward asset returns of the top and bottom quantiles of each factor. Additionally, there is a parameter optimization process that gridsearches feature selection parameters such as factor counts, factor performance metrics, and factor performance thresholds. Below is a walkthrough of the process that led to a manual analysis that proved more valuable than automation, resulting in a trading strategy that consistently produces returns in excess of the index based on a 2016 backtest.
 
 ### Trading Strategy
-The actual trading strategy rebalances a portfolio every Tuesday at market close according to mean factor zscores for each asset. Portfolio returns are benchmarked against an even allocation of contributing assets that also rebalances every Tuesday at market close.
+The actual trade execution strategy rebalances a portfolio every Tuesday at market close according to mean factor zscores for each asset. Portfolio returns are benchmarked against an even allocation of contributing assets that also rebalances every Tuesday at market close. The trading return results assume no execution slippage or transactions fees.
 
-### Automated Feature Selection
-Although the process is fairly robust in building and examining a large number of features, the method for measuring feature significance in the execution plan outlined below returns poor results. One problem with the current method is that a feature can only have one quantile during the entire training period. For example if a feature's value is always rising, the current value may always be in the top quantile of the trailing period. Because the current method compares top and bottom quantiles, many features are eliminated from analysis in the final step.
+### Automated Method
+(see bottom for code commentary)
 
-### Manual Analysis
-In theory the default process should choose factors that are predictive of both long and short returns resulting in excess returns, but the parameter permutation results show an average negative excess return across nearly all parameter types. This means that the current feature selection process is not selecting significant features.
+Although the process is fairly robust in building and examining a large number of features, the asset level quantile difference method for measuring feature significance returns poor results. In theory the default process should choose factors that are predictive of both long and short returns resulting in excess returns over the benchmark, but the parameter permutation results show an average negative excess return across nearly all parameter types. This means that the current feature selection process is not selecting significant feature combinations.
 
 Parameter permutation average returns by factor type:
 
@@ -18,6 +17,8 @@ Parameter permutation average returns by factor type:
 |---|:---:|:---:|:---:|
 | mean | -5.0% | -4.6% | -0.4% |
 | zscore | -5.3% | -3.8% | -1.5% |
+
+### Manual Analysis
 
 #### Generalize
 Given the poor mean results, there is something wrong with the feature selection method. The first thought is a potential overfitting problem because feature selection chooses the features with the most significant signal or return for a given asset. Averaging feature results across assets should generalize the results and reduce variance. However, purely averaging across the assets and running the same automated selection of top 20 features resulted in negative excess returns.
@@ -50,7 +51,17 @@ Backtested Returns
 | Excess Return | 3.8% |
 
 Backtested Returns Plot
+
 ![alt text](https://github.com/deanjohnr/macrotrendfollow/blob/master/analysis/momoreturns.png?raw=true "2016 returns")
+
+### Conclusion
+Manual analysis guided by intuition produced the best feature selection results. This feature selection method could then be incorporated into the automated system to potentially produce better automated strategy building. The most predictive feature types were relative moving average and derivative momentum. Leveraging the config file system it would be easy, but time consuming, to thoroughly explore the effect of time periods on these two features. Overall the CFTC data seems to have fairly strong predictive power that is capable of producing returns that beat the benchmark.
+
+#### Next Steps
+* Rebuild the automated feature selection logic to add more generalization
+* Gridsearch optimal period lengths for moving average and momentum features
+* Build cross investor type features
+* Build machine learning based ensemble features
 
 ### Automated Results
 Cloning and running should give a strategy that produces the following 2016 backtest results:
@@ -128,6 +139,28 @@ Cloning and running should give a strategy that produces the following 2016 back
 | Long_Short_Diff | Long - Short |
 | Short_Ratio | Short / Gross Total |
 | Net | Net Position |
+
+### Code Commentary
+
+#### Configuration
+The system contains a `config.json` file that controls the data inputs, feature building, and back testing parameter search. Each main python script starts by initializing and importing the configuration.
+
+#### Data Gathering
+The first section of code is devoted to gathering data. The only way to consume price data for the set of 8 tickers was to build a customer Google finance scraper, `get_prices()`. Google doesn't have downloadable history for most tickers so the custom scraper was necessary. The Yahoo Finance API is broken, the Quandl data doesn't go back far enough in time, and Quantopian doesn't give users the ability to export data from their system.
+
+The CFTC data was manually downloaded, unzipped, and made available for loading into a data frame. A more robust system would pull the file directly in the script, unzip to a temporary location for loading. This was attempted, but there was an issue with the various urlib modules that kept raising errors.
+
+#### Data Cleaning
+Data cleaning is pretty straight forward, using two functions, `clean_columns` and `clean_outliers`. `clean_columns` checks each data column to ensure majority of the column contains numeric values and rejects bad columns. `clean_outliers` searches the data for outlier values and replaces them with a local median.
+
+#### Feature Building
+Feature building is broken into 3 main pieces, CFTC feature manipulation, momentum, and moving average permutation. The CFTC feature manipulation builds intra investor type features such as short ratio and net exposure. The momentum section builds two feature types, vanilla momentum, a trailing price change metric, and derivative momentum, a trailing change in price change metric. The moving average permutation iterates through the defined configuration, building short term versus long term moving average features.
+
+#### Factor Building
+That last piece of building code creates the trailing feature z scores and bins and stores the mean returns associated with each asset, feature, and bin combination. The last step stores the historical results data and the price data for backtesting.
+
+#### Feature Selection and Backtesting
+The final step runs a gridsearch on feature selection parameters, backtesting each permutaion, and storing the results for analysis.
 
 ### Execution
 This takes over an hour:
